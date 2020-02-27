@@ -1,43 +1,43 @@
-
-buildscript {
-    repositories {
-        maven {
-            url 'https://plugins.gradle.org/m2/'
-        }
-    }
-    dependencies {
-        classpath 'com.gradle.publish:plugin-publish-plugin:0.9.8'
-    }
+plugins {
+    id 'com.gradle.plugin-publish' version '0.10.1'
+    id 'java-gradle-plugin'
+    id 'groovy'
 }
-
-apply plugin: 'com.gradle.plugin-publish'
 
 repositories {
     jcenter()
 }
 
+version = '0.2.0-SNAPSHOT'
+group = 'com.github.sahara3'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
 dependencies {
-    compile gradleApi()
     compile localGroovy()
     compile 'org.apache.tomcat.embed:tomcat-embed-core:7.0.+'
 }
 
+gradlePlugin {
+    plugins {
+        tomcatRunnerPlugin {
+            id = 'com.github.sahara3.tomcat-runner-plugin'
+            implementationClass = 'com.github.sahara3.gradle.tomcat.TomcatRunnerPlugin'
+        }
+    }
+}
+
 pluginBundle {
     website = 'https://github.com/sahara3/gradle-tomcat-runner-plugin'
-    vcsUrl = 'https://github.com/sahara3/gradle-tomcat-runner-plugin'
+    vcsUrl = 'https://github.com/sahara3/gradle-tomcat-runner-plugin.git'
     description = 'Gradle plugin for running Apache Tomcat'
+    tags = ['tomcat']
 
     plugins {
         tomcatRunnerPlugin {
-            id = 'org.samples.greeting'
+            // id is captured from java-gradle-plugin configuration
             displayName = 'Gradle Tomcat Runner plugin'
-            tags = ['tomcat']
         }
-    }
-
-    mavenCoordinates {
-        groupId = 'com.github.sahara3'
-        artifactId = 'tomcat-runner-plugin'
-        version = '0.1'
     }
 }
