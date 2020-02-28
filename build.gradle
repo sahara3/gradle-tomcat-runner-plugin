@@ -1,7 +1,8 @@
 plugins {
-    id 'com.gradle.plugin-publish' version '0.10.1'
     id 'java-gradle-plugin'
-    id 'groovy'
+    id 'com.gradle.plugin-publish' version '0.10.1'
+    id 'maven-publish'
+    id 'eclipse'
 }
 
 repositories {
@@ -15,14 +16,16 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 dependencies {
-    compile localGroovy()
-    compile 'org.apache.tomcat.embed:tomcat-embed-core:7.0.+'
+    compileOnly 'org.projectlombok:lombok:1.18.12'
+    annotationProcessor 'org.projectlombok:lombok:1.18.12'
+
+    compileOnly 'org.apache.tomcat.embed:tomcat-embed-core:7.0.59'
 }
 
 gradlePlugin {
     plugins {
         tomcatRunnerPlugin {
-            id = 'com.github.sahara3.tomcat-runner-plugin'
+            id = 'com.github.sahara3.tomcat-runner'
             implementationClass = 'com.github.sahara3.gradle.tomcat.TomcatRunnerPlugin'
         }
     }
@@ -38,6 +41,22 @@ pluginBundle {
         tomcatRunnerPlugin {
             // id is captured from java-gradle-plugin configuration
             displayName = 'Gradle Tomcat Runner plugin'
+        }
+    }
+}
+
+if (version.endsWith('-SNAPSHOT')) {
+    publishing {
+        publications {
+            pluginPublication(MavenPublication) {
+                from components.java
+            }
+        }
+        repositories {
+            maven {
+                name = 'local'
+                url = "file://${rootProject.buildDir}/maven"
+            }
         }
     }
 }

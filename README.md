@@ -14,31 +14,24 @@ Usage
 -----
 
 ```gradle
-buildscript {
-  repositories {
-    maven {
-      url 'https://plugins.gradle.org/m2/'
-    }
-  }
-  dependencies {
-    classpath 'com.github.sahara3:tomcat-runner-plugin:0.1'
-  }
-}
-
-apply plugin: 'tomcat-runner-plugin:0.1'
-
-dependencies {
-  webapp project(':myapp1')
-  webapp project(':myapp2')
+plugin {
+    id 'com.github.sahara3.tomcat-runner' version '0.2.0'
 }
 
 tomcat {
-  port = 8080
-  systemProperty 'your.custom.property', 'property-value'
+    version = 9.0
+    port = 8080
+    systemProperty 'your.custom.property', 'property-value'
+
+    webapp project(':myapp1')
+
+    webapp 'path/to/myapp2.war'
+
+    webapp project(':myapp3') {
+        contextPath = '/my-app-3'
+    }
 }
 ```
 
-This plugin adds a configuration named 'webapp'. You can specify Web
-application projects in this 'webapp' configuraion dependency.
-
-War plugin should be applied to Web application projects.
+To add a Web application project as webapp, you should apply War
+plugin to the Web application project.

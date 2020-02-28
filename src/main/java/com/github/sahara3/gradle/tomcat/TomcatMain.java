@@ -1,13 +1,11 @@
-// -*- mode: groovy -*-
 package com.github.sahara3.gradle.tomcat;
 
 import java.io.File;
 
-import org.apache.catalina.startup.HostConfig;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.startup.VersionLoggerListener;
 
-public class TomcatRunner {
+public class TomcatMain {
 
     public static void main(String[] args) throws Exception {
         int port = Integer.parseInt(System.getProperty("tomcat.port"));
@@ -19,12 +17,15 @@ public class TomcatRunner {
         tomcat.setBaseDir(base);
         tomcat.getServer().addLifecycleListener(new VersionLoggerListener());
 
-        // automatic war detection.
-        //tomcat.getHost().addLifecycleListener(new HostConfig());
-        for (String war : args) {
-            File warfile = new File(war);
-            String name = warfile.getName().replaceAll("\\.war$", "");
-            tomcat.addWebapp("/" + name, warfile.getAbsolutePath());
+        // add webapps.
+        // tomcat.getHost().addLifecycleListener(new HostConfig());
+        if (args.length % 2 != 0) {
+            throw new IllegalArgumentException("arguments must be a list of (war, contextPath).");
+        }
+        for (int n = 0; n < args.length / 2; n++) {
+            String warPath = args[n];
+            String contextPath = args[n + 1];
+            tomcat.addWebapp(contextPath, warPath);
         }
 
         tomcat.start();
