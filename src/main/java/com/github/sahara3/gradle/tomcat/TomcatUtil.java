@@ -1,8 +1,9 @@
 package com.github.sahara3.gradle.tomcat;
 
 import java.io.File;
-import java.util.HashSet;
+import java.util.Arrays;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Dependency;
@@ -19,30 +20,35 @@ class TomcatUtil {
 
     public static Set<Dependency> getDefaultTomcatEmbedDependencies(Project project, TomcatRunnerExtension extension) {
         // determine version.
-        String versionString = null;
-
-        double version = extension.getVersion();
-        if (Double.compare(version, 7.0) == 0) {
-            versionString = "7.0.+";
-        } else if (Double.compare(version, 8.0) == 0) {
-            versionString = "8.0.+";
-        } else if (Double.compare(version, 8.5) == 0) {
-            versionString = "8.5.+";
-        } else if (Double.compare(version, 9.0) == 0) {
-            versionString = "9.0.+";
-        } else if (Double.compare(version, 10.0) == 0) {
-            versionString = "10.0.+";
-        } else {
-            versionString = Double.toString(version) + ".+";
-        }
+        String version = determineTomcatVersionString(extension.getVersion());
 
         // create a set of module dependencies.
-        String group = "org.apache.tomcat.embed";
-
-        Set<Dependency> set = new HashSet<>();
-        set.add(new DefaultExternalModuleDependency(group, "tomcat-embed-core", versionString));
-
+        Set<Dependency> set = Arrays
+                .asList("tomcat-embed-core", "tomcat-embed-el", "tomcat-embed-jasper", "tomcat-embed-websocket")
+                .stream()
+                .map(artifact -> new DefaultExternalModuleDependency("org.apache.tomcat.embed", artifact, version))
+                .collect(Collectors.toSet());
         return set;
     }
 
+    private static String determineTomcatVersionString(double version) {
+        if (Double.compare(version, 7.0) == 0) {
+            return "7.0.+";
+        }
+        if (Double.compare(version, 8.0) == 0) {
+            return "8.0.+";
+        }
+        if (Double.compare(version, 8.5) == 0) {
+            return "8.5.+";
+        }
+        if (Double.compare(version, 9.0) == 0) {
+            return "9.0.+";
+        }
+        if (Double.compare(version, 10.0) == 0) {
+            return "10.0.+";
+        }
+
+        // it may be incorrect.
+        return Double.toString(version) + ".+";
+    }
 }
