@@ -15,6 +15,7 @@ public class TomcatRunTask extends JavaExec {
     public TomcatRunTask() {
         // set default values.
         this.setMain(TomcatLauncher.class.getCanonicalName());
+        this.setStandardInput(System.in);
     }
 
     @TaskAction
@@ -41,8 +42,6 @@ public class TomcatRunTask extends JavaExec {
         // setup arguments.
         int port = ext.getPort();
         this.args(port, base.getAbsolutePath());
-        // this.systemProperty("tomcat.base", base.getAbsolutePath());
-        // this.systemProperty("tomcat.port", port);
 
         ext.getWebapps().forEach(webapp -> {
             File warFile = webapp.getWarFile();
