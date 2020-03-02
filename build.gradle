@@ -9,7 +9,7 @@ repositories {
     jcenter()
 }
 
-version = '0.2.0-SNAPSHOT'
+version = '0.2.0'
 group = 'com.github.sahara3'
 
 sourceCompatibility = 1.8
