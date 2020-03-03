@@ -1,0 +1,54 @@
+buildscript {
+    apply from: '../version.gradle'
+    repositories {
+        maven {
+            url 'https://plugins.gradle.org/m2/'
+        }
+        mavenCentral()
+        mavenLocal()
+    }
+
+    dependencies {
+        classpath "com.github.sahara3:gradle-tomcat-runner-plugin:${pluginVersion}"
+    }
+}
+
+// each test case.
+configure(subprojects) {
+    apply plugin: 'java'
+    apply plugin: 'war'
+    apply plugin: 'eclipse'
+    apply plugin: 'com.github.sahara3.tomcat-runner'
+
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        // compileOnly 'org.projectlombok:lombok'
+        // annotationProcessor 'org.projectlombok:lombok'
+        // testCompileOnly 'org.projectlombok:lombok'
+        // testAnnotationProcessor 'org.projectlombok:lombok'
+
+        providedCompile 'javax.servlet:javax.servlet-api:3.0.1'
+    }
+}
+
+// all combination.
+apply plugin: 'com.github.sahara3.tomcat-runner'
+
+tomcat {
+    version = 9.0
+    port = 8080
+    systemProperty 'your.custom.property', 'property-value'
+
+    webapp(project(':myapp1')) {
+        contextPath = '' // root context.
+    }
+
+    webapp project(':myapp2')
+
+    webapp 'myapp3/build/libs/myapp3.war'
+
+    webapp file('myapp4/build/libs/myapp4.war')
+}

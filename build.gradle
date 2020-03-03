@@ -5,11 +5,13 @@ plugins {
     id 'eclipse'
 }
 
+apply from: 'version.gradle'
+
 repositories {
     jcenter()
 }
 
-version = '0.2.0'
+version = pluginVersion
 group = 'com.github.sahara3'
 
 sourceCompatibility = 1.8
@@ -46,17 +48,18 @@ pluginBundle {
 }
 
 if (version.endsWith('-SNAPSHOT')) {
+    tasks.publishPlugins.enabled = false
+    tasks.publish.enabled = false
+
     publishing {
         publications {
             pluginPublication(MavenPublication) {
                 from components.java
             }
         }
-        repositories {
-            maven {
-                name = 'local'
-                url = "file://${rootProject.buildDir}/maven"
-            }
-        }
     }
+}
+
+tasks.clean.doLast {
+    project.delete 'bin'
 }

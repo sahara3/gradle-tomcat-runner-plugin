@@ -1,0 +1,6 @@
+rootProject.name = 'gradle-tomcat-runner-plugin-tests'
+
+include ':myapp1'
+include ':myapp2'
+include ':myapp3'
+include ':myapp4'

@@ -23,13 +23,15 @@ tomcat {
     port = 8080
     systemProperty 'your.custom.property', 'property-value'
 
-    webapp project(':myapp1')
-
-    webapp 'path/to/myapp2.war'
-
-    webapp project(':myapp3') {
-        contextPath = '/my-app-3'
+    webapp(project(':myapp1')) {
+        contextPath = '' // root context.
     }
+
+    webapp project(':myapp2')
+
+    webapp 'myapp3/build/libs/myapp3.war'
+
+    webapp file('myapp4/build/libs/myapp4.war')
 }
 ```
 
