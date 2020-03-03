@@ -1,13 +1,5 @@
 unzipWebapps.dependsOn war
 
-dependencies {
-    implementation('org.apache.taglibs:taglibs-standard-jstlel:1.2.5') {
-        exclude group: 'javax.el', module: 'el-api'
-        exclude group: 'javax.servlet', module: 'servlet-api'
-        exclude group: 'javax.servlet.jsp', module: 'jsp-api'
-    }
-}
-
 tomcat {
     version = 7.0
     port = 8080

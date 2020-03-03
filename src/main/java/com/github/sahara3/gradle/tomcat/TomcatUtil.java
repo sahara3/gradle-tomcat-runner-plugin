@@ -26,6 +26,16 @@ class TomcatUtil {
                 .map(artifact -> new DefaultExternalModuleDependency("org.apache.tomcat.embed", artifact, version))
                 .collect(Collectors.toSet());
 
+        // add JSTL implementation libraries.
+        List<String> jstlModules = new ArrayList<>(
+                Arrays.asList("taglibs-standard-impl", "taglibs-standard-spec", "taglibs-standard-jstlel"));
+        jstlModules.stream()
+                .map(artifact -> new DefaultExternalModuleDependency("org.apache.taglibs", artifact, "1.2.5"))
+                .forEach(dependency -> {
+                    dependency.setTransitive(false);
+                    set.add(dependency);
+                });
+
         // add logging libraries.
         set.add(new DefaultExternalModuleDependency("ch.qos.logback", "logback-classic", "1.2.3"));
         set.add(new DefaultExternalModuleDependency("org.slf4j", "slf4j-api", "1.7.30"));
