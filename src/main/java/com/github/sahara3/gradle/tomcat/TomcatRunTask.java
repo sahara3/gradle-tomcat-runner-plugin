@@ -1,16 +1,34 @@
 package com.github.sahara3.gradle.tomcat;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.JarURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.tasks.InputDirectory;
 import org.gradle.api.tasks.JavaExec;
 import org.gradle.api.tasks.TaskAction;
 
+import lombok.Getter;
+import lombok.Setter;
+
 public class TomcatRunTask extends JavaExec {
+
+    @Getter
+    @Setter
+    @InputDirectory
+    private File baseDirectory;
+
+    @Getter
+    @Setter
+    @InputDirectory
+    private File appBaseDirectory;
 
     public TomcatRunTask() {
         // set default values.
@@ -30,32 +48,27 @@ public class TomcatRunTask extends JavaExec {
         });
         this.classpath(getLauncherClasspath());
 
-        // prepare webapps directory.
-        File base = TomcatUtil.determineBaseDirectory(project, ext);
-        project.mkdir(new File(base, "webapps"));
-
         // setup system properties.
         ext.getSystemProperties().forEach((name, value) -> {
             this.systemProperty(name, value);
         });
 
-        // setup arguments.
-        int port = ext.getPort();
-        this.args(port, base.getAbsolutePath());
-
-        ext.getWebapps().forEach(webapp -> {
-            File warFile = webapp.getWarFile();
-            String contextPath = webapp.getContextPath();
-            if (contextPath == null) {
-                String name = warFile.getName().replaceAll("\\.war$", "");
-                contextPath = name.equals("ROOT") ? "" : "/" + name;
-            }
-
-            this.args(warFile.getAbsolutePath(), contextPath);
-        });
+        // cleanup unknown directories in webapps.
+        Set<String> appNames = ext.getWebapps().stream().map(WebAppConfiguration::getDocBaseName)
+                .collect(Collectors.toSet());
+        try {
+            Files.list(this.appBaseDirectory.toPath())
+                    .filter(entry -> !appNames.contains(entry.getFileName().toString())).forEach(entry -> {
+                        project.delete(entry.toFile());
+                    });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         // run.
-        this.getLogger().quiet("Tomcat run: base={}, port={}", base, port);
+        int port = ext.getPort();
+        this.args(port, this.baseDirectory.getAbsolutePath(), this.appBaseDirectory.getAbsolutePath());
+        this.getLogger().info("Tomcat run: port={}, base={}", port, this.baseDirectory);
         this.getLogger().info("Tomcat classpath: {}", this.getClasspath().getFiles());
         super.exec();
     }

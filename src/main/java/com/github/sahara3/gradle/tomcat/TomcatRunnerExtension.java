@@ -9,17 +9,16 @@ import java.util.Map;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
 public class TomcatRunnerExtension {
 
-    @Getter(AccessLevel.PROTECTED)
+    @Getter
     @Setter
     private double version = 9.0;
 
-    @Getter(AccessLevel.PROTECTED)
+    @Getter
     private File baseDirectory;
 
     public void setBaseDirectory(File baseDirectory) {
@@ -35,30 +34,46 @@ public class TomcatRunnerExtension {
         this.setBaseDirectory(baseDir);
     }
 
-    @Getter(AccessLevel.PROTECTED)
+    @Getter
     @Setter
     private int port = 8080;
 
-    @Getter(AccessLevel.PROTECTED)
+    @Getter
     private final List<WebAppConfiguration> webapps = new ArrayList<>();
 
     public void webapp(File warFile, Action<WebAppConfiguration> action) {
         WebAppConfiguration conf = new WebAppConfiguration(warFile);
-        action.execute(conf);
+        if (action != null) {
+            action.execute(conf);
+        }
         this.webapps.add(conf);
+    }
+
+    public void webapp(File warFile) {
+        this.webapp(warFile, null);
     }
 
     public void webapp(String warFilePath, Action<WebAppConfiguration> action) {
         this.webapp(new File(warFilePath), action);
     }
 
+    public void webapp(String warFilePath) {
+        this.webapp(new File(warFilePath), null);
+    }
+
     public void webapp(Project warProject, Action<WebAppConfiguration> action) {
         WebAppConfiguration conf = new WebAppConfiguration(warProject);
-        action.execute(conf);
+        if (action != null) {
+            action.execute(conf);
+        }
         this.webapps.add(conf);
     }
 
-    @Getter(AccessLevel.PROTECTED)
+    public void webapp(Project warProject) {
+        this.webapp(warProject, null);
+    }
+
+    @Getter
     private final Map<String, Object> systemProperties = new HashMap<>();
 
     public void systemProperty(String name, Object value) {

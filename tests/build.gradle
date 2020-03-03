@@ -1,9 +1,6 @@
 buildscript {
     apply from: '../version.gradle'
     repositories {
-        maven {
-            url 'https://plugins.gradle.org/m2/'
-        }
         mavenCentral()
         mavenLocal()
     }
@@ -13,29 +10,27 @@ buildscript {
     }
 }
 
-// each test case.
-configure(subprojects) {
-    apply plugin: 'java'
-    apply plugin: 'war'
-    apply plugin: 'eclipse'
+configure(allprojects) {
     apply plugin: 'com.github.sahara3.tomcat-runner'
 
     repositories {
         jcenter()
     }
+}
+
+// each test case.
+configure(subprojects) {
+    apply plugin: 'java'
+    apply plugin: 'war'
+    apply plugin: 'eclipse'
 
     dependencies {
-        // compileOnly 'org.projectlombok:lombok'
-        // annotationProcessor 'org.projectlombok:lombok'
-        // testCompileOnly 'org.projectlombok:lombok'
-        // testAnnotationProcessor 'org.projectlombok:lombok'
-
         providedCompile 'javax.servlet:javax.servlet-api:3.0.1'
     }
 }
 
 // all combination.
-apply plugin: 'com.github.sahara3.tomcat-runner'
+unzipWebapps.dependsOn ':myapp1:war', ':myapp2:war', ':myapp3:war', ':myapp4:war'
 
 tomcat {
     version = 9.0

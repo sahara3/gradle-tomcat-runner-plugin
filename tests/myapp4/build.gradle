@@ -1,5 +1,6 @@
+unzipWebapps.dependsOn war
+
 dependencies {
-    // implementation 'javax.servlet.jsp.jstl:jstl:1.2'
     implementation('org.apache.taglibs:taglibs-standard-jstlel:1.2.5') {
         exclude group: 'javax.el', module: 'el-api'
         exclude group: 'javax.servlet', module: 'servlet-api'

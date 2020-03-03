@@ -17,7 +17,7 @@ public class WebAppConfiguration {
     @Getter(AccessLevel.PROTECTED)
     private final Project warProject;
 
-    protected File getWarFile() {
+    public File getWarFile() {
         if (this.warFile != null) {
             return this.warFile;
         }
@@ -36,8 +36,24 @@ public class WebAppConfiguration {
         this.warProject = warProject;
     }
 
-    @Getter(AccessLevel.PROTECTED)
-    @Setter(AccessLevel.PROTECTED)
+    @Setter
     private String contextPath = null;
 
+    public String getContextPath() {
+        String name = this.getDocBaseName();
+        return "ROOT".equals(name) ? "" : "/" + name;
+    }
+
+    public String getDocBaseName() {
+        String name = this.contextPath;
+        if (name == null) {
+            name = this.getWarFile().getName().replaceAll("\\.war$", "");
+        }
+        name = name.trim();
+
+        if (name.startsWith("/")) {
+            name = name.replaceFirst("^/+", "");
+        }
+        return name.isEmpty() ? "ROOT" : name;
+    }
 }
