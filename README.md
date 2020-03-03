@@ -15,7 +15,7 @@ Usage
 
 ```gradle
 plugin {
-    id 'com.github.sahara3.tomcat-runner' version '0.2.0'
+    id 'com.github.sahara3.tomcat-runner' version '0.2.1'
 }
 
 tomcat {
