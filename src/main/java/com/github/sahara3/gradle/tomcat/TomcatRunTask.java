@@ -53,6 +53,12 @@ public class TomcatRunTask extends JavaExec {
             this.systemProperty(name, value);
         });
 
+        String jarsToSkip = TomcatUtil.getJarsToSkipPropertyName(ext.getVersion());
+        if (!this.getSystemProperties().containsKey(jarsToSkip)) {
+            // add jarsToSkip property if not defined.
+            this.systemProperty(jarsToSkip, String.join(",", ext.getJarsToSkip()));
+        }
+
         // cleanup unknown directories in webapps.
         Set<String> appNames = ext.getWebapps().stream().map(WebAppConfiguration::getDocBaseName)
                 .collect(Collectors.toSet());

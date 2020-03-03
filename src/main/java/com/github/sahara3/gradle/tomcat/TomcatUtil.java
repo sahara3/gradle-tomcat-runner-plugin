@@ -64,4 +64,11 @@ class TomcatUtil {
         // it may be incorrect.
         return Double.toString(version) + ".+";
     }
+
+    public static String getJarsToSkipPropertyName(double version) {
+        if (Double.compare(version, 7.0) == 0) {
+            return "tomcat.util.scan.DefaultJarScanner.jarsToSkip";
+        }
+        return "tomcat.util.scan.StandardJarScanFilter.jarsToSkip";
+    }
 }
