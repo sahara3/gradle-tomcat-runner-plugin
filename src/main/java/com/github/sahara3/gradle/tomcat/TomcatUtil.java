@@ -1,74 +1,46 @@
 package com.github.sahara3.gradle.tomcat;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import org.gradle.api.Project;
 import org.gradle.api.artifacts.Dependency;
+import org.gradle.api.artifacts.ModuleDependency;
 import org.gradle.api.internal.artifacts.dependencies.DefaultExternalModuleDependency;
 
 class TomcatUtil {
 
-    public static Set<Dependency> getDefaultTomcatEmbedDependencies(Project project, TomcatRunnerExtension extension) {
-        // determine version.
-        String version = determineTomcatVersionString(extension.getVersion());
+    public static Set<Dependency> getDefaultTomcatEmbedDependencies(TomcatRunnerExtension extension) {
+        String version = extension.getVersion();
 
         // create a set of module dependencies for tomcat-embed.
-        List<String> embedModules = new ArrayList<>(
-                Arrays.asList("tomcat-embed-core", "tomcat-embed-el", "tomcat-embed-jasper", "tomcat-embed-websocket"));
-        if (version.startsWith("7.0")) {
-            embedModules.add("tomcat-embed-logging-juli");
-        }
-        Set<Dependency> set = embedModules.stream()
-                .map(artifact -> new DefaultExternalModuleDependency("org.apache.tomcat.embed", artifact, version))
+        Set<Dependency> modules = Stream.of(
+                        "tomcat-embed-core", "tomcat-embed-el", "tomcat-embed-jasper", "tomcat-embed-websocket")
+                .map(name -> createTomcatModuleDependency("org.apache.tomcat.embed", name, version))
                 .collect(Collectors.toSet());
 
+        modules.add(createTomcatModuleDependency("org.apache.tomcat", "tomcat-annotations-api", version));
+
         // add JSTL implementation libraries.
-        List<String> jstlModules = new ArrayList<>(
-                Arrays.asList("taglibs-standard-impl", "taglibs-standard-spec", "taglibs-standard-jstlel"));
-        jstlModules.stream()
-                .map(artifact -> new DefaultExternalModuleDependency("org.apache.taglibs", artifact, "1.2.5"))
-                .forEach(dependency -> {
-                    dependency.setTransitive(false);
-                    set.add(dependency);
-                });
+        Set<Dependency> jstlModules = Stream.of(
+                        "taglibs-standard-impl", "taglibs-standard-spec", "taglibs-standard-jstlel")
+                .map(name -> new DefaultExternalModuleDependency("org.apache.taglibs", name, "1.2.5")
+                        .setTransitive(false))
+                .collect(Collectors.toSet());
 
-        // add logging libraries.
-        set.add(new DefaultExternalModuleDependency("ch.qos.logback", "logback-classic", "1.2.3"));
-        set.add(new DefaultExternalModuleDependency("org.slf4j", "slf4j-api", "1.7.30"));
-        set.add(new DefaultExternalModuleDependency("org.slf4j", "jul-to-slf4j", "1.7.30"));
+        modules.addAll(jstlModules);
 
-        return set;
+        return modules;
     }
 
-    private static String determineTomcatVersionString(double version) {
-        if (Double.compare(version, 7.0) == 0) {
-            return "7.0.+";
-        }
-        if (Double.compare(version, 8.0) == 0) {
-            return "8.0.+";
-        }
-        if (Double.compare(version, 8.5) == 0) {
-            return "8.5.+";
-        }
-        if (Double.compare(version, 9.0) == 0) {
-            return "9.0.+";
-        }
-        if (Double.compare(version, 10.0) == 0) {
-            return "10.0.+";
-        }
-
-        // it may be incorrect.
-        return Double.toString(version) + ".+";
+    private static ModuleDependency createTomcatModuleDependency(String group, String name, String version) {
+        DefaultExternalModuleDependency dependency = new DefaultExternalModuleDependency(group, name, version);
+        dependency.version(constraint -> constraint.require(version));
+        dependency.setTransitive(true);
+        return dependency;
     }
 
-    public static String getJarsToSkipPropertyName(double version) {
-        if (Double.compare(version, 7.0) == 0) {
-            return "tomcat.util.scan.DefaultJarScanner.jarsToSkip";
-        }
+    public static String getJarsToSkipPropertyName(@SuppressWarnings("unused") String version) {
         return "tomcat.util.scan.StandardJarScanFilter.jarsToSkip";
     }
 }

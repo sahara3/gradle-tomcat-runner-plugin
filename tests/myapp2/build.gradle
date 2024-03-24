@@ -1,5 +1,5 @@
 tomcat {
-    version = 8.5
+    version = '8.5.99'
     port = 8080
     webapp(project) {
         contextPath = '/' // this is also root.

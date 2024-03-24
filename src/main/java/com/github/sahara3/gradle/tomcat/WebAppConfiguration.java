@@ -2,13 +2,12 @@ package com.github.sahara3.gradle.tomcat;
 
 import java.io.File;
 
-import org.gradle.api.Project;
-import org.gradle.api.plugins.WarPlugin;
-import org.gradle.api.tasks.bundling.War;
-
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.gradle.api.Project;
+import org.gradle.api.plugins.WarPlugin;
+import org.gradle.api.tasks.bundling.War;
 
 public class WebAppConfiguration {
 
@@ -22,6 +21,7 @@ public class WebAppConfiguration {
             return this.warFile;
         }
 
+        assert warProject != null;
         War warTask = (War) warProject.getTasks().getByName(WarPlugin.WAR_TASK_NAME);
         return warTask.getArchiveFile().get().getAsFile();
     }

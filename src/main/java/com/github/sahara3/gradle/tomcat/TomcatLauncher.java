@@ -2,13 +2,15 @@ package com.github.sahara3.gradle.tomcat;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
-import javax.servlet.ServletException;
+import java.util.stream.Stream;
 
 import org.apache.catalina.Host;
 import org.apache.catalina.LifecycleException;
@@ -16,32 +18,51 @@ import org.apache.catalina.Server;
 import org.apache.catalina.core.StandardHost;
 import org.apache.catalina.startup.Tomcat;
 import org.apache.catalina.startup.VersionLoggerListener;
-import org.slf4j.bridge.SLF4JBridgeHandler;
 
 public class TomcatLauncher {
 
+    private final static Logger LOG = Logger.getLogger(TomcatLauncher.class.getName());
+
     public static void main(String[] args) throws Exception {
-        SLF4JBridgeHandler.removeHandlersForRootLogger();
-        SLF4JBridgeHandler.install();
+        tryToInstallSlf4jLogger();
 
         int port = Integer.parseInt(args[0]);
         String base = args[1];
         String appBase = args[2];
 
+        LOG.info("Starting tomcat...");
         TomcatLauncher launcher = new TomcatLauncher(port, base, appBase);
         launcher.start();
 
-        while (System.in.read() >= 0) {
-            // wait for EOF. (Ctrl+D, etc.)
+        while (true) {
+            try {
+                //noinspection BusyWait
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                break;
+            }
         }
         launcher.stop();
     }
 
-    private int port;
+    private static void tryToInstallSlf4jLogger() {
+        try {
+            Class<?> bridgeClass = Class.forName("org.slf4j.bridge.SLF4JBridgeHandler");
+            Method removeHandlersForRootLogger = bridgeClass.getMethod("removeHandlersForRootLogger");
+            removeHandlersForRootLogger.invoke(null);
+            Method install = bridgeClass.getMethod("install");
+            install.invoke(null);
+        } catch (ClassNotFoundException | NoClassDefFoundError
+                 | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+            // pass.
+        }
+    }
 
-    private String baseDir;
+    private final int port;
 
-    private String appBaseDir;
+    private final String baseDir;
+
+    private final String appBaseDir;
 
     private Tomcat tomcat;
 
@@ -51,7 +72,7 @@ public class TomcatLauncher {
         this.appBaseDir = appBaseDir;
     }
 
-    synchronized void start() throws IOException, ServletException, LifecycleException {
+    synchronized void start() throws IOException, LifecycleException {
         if (this.tomcat != null) {
             throw new IllegalStateException("Tomcat is already started.");
         }
@@ -93,10 +114,12 @@ public class TomcatLauncher {
         host.setAppBase(this.appBaseDir);
     }
 
-    private void registerWebapps(Host host) throws IOException, ServletException {
+    private void registerWebapps(Host host) throws IOException {
         Path appBase = Paths.get(host.getAppBase());
-        List<File> appDirs = Files.list(appBase).filter(entry -> entry.toFile().isDirectory()).map(Path::toFile)
-                .collect(Collectors.toList());
+        List<File> appDirs;
+        try (Stream<Path> paths = Files.list(appBase)) {
+            appDirs = paths.map(Path::toFile).filter(File::isDirectory).collect(Collectors.toList());
+        }
         for (File appDir : appDirs) {
             String name = appDir.getName();
             String contextPath = "ROOT".equals(name) ? "" : "/" + name;

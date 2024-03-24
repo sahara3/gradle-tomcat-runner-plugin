@@ -1,33 +1,30 @@
 plugins {
     id 'java-gradle-plugin'
-    id 'com.gradle.plugin-publish' version '0.10.1'
+    id 'com.gradle.plugin-publish' version '0.21.0'
     id 'maven-publish'
-    id 'eclipse'
 }
 
 apply from: 'version.gradle'
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 version = pluginVersion
 group = 'com.github.sahara3'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
 
 dependencies {
-    compileOnly 'org.projectlombok:lombok:1.18.12'
-    annotationProcessor 'org.projectlombok:lombok:1.18.12'
+    compileOnly 'org.projectlombok:lombok:1.18.32'
+    annotationProcessor 'org.projectlombok:lombok:1.18.32'
 
-    compileOnly 'org.apache.tomcat.embed:tomcat-embed-core:7.0.59'
+    compileOnly 'org.apache.tomcat.embed:tomcat-embed-core:8.0.53'
 
-    implementation 'org.apache.commons:commons-lang3:3.9'
-
-    implementation 'org.slf4j:slf4j-api:1.7.30'
-    runtimeOnly 'ch.qos.logback:logback-classic:1.2.3'
-    runtimeOnly 'org.slf4j:jul-to-slf4j:1.7.30'
+    implementation 'org.apache.commons:commons-lang3:3.14.0'
 }
 
 gradlePlugin {

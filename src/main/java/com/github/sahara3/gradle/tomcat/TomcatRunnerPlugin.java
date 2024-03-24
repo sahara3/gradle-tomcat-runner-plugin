@@ -3,6 +3,7 @@ package com.github.sahara3.gradle.tomcat;
 import java.io.File;
 import java.util.Set;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.Action;
 import org.gradle.api.Plugin;
@@ -13,8 +14,6 @@ import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.plugins.WarPlugin;
 import org.gradle.api.tasks.Copy;
 import org.gradle.api.tasks.Delete;
-
-import lombok.RequiredArgsConstructor;
 
 public class TomcatRunnerPlugin implements Plugin<Project> {
 
@@ -28,7 +27,7 @@ public class TomcatRunnerPlugin implements Plugin<Project> {
 
     @Override
     public void apply(Project project) {
-        project.getConfigurations().create(TOMCAT_CONFIGURATION_NAME);
+        Configuration config = project.getConfigurations().create(TOMCAT_CONFIGURATION_NAME);
 
         project.getExtensions().create(TOMCAT_EXTENSION_NAME, TomcatRunnerExtension.class);
 
@@ -69,13 +68,9 @@ public class TomcatRunnerPlugin implements Plugin<Project> {
             TomcatRunnerExtension ext = project.getExtensions().getByType(TomcatRunnerExtension.class);
 
             // set dependency to tomcat-embed-core.
-            Set<Dependency> tomcatModules = TomcatUtil.getDefaultTomcatEmbedDependencies(project, ext);
+            Set<Dependency> tomcatModules = TomcatUtil.getDefaultTomcatEmbedDependencies(ext);
             Configuration config = project.getConfigurations().getByName(TOMCAT_CONFIGURATION_NAME);
-            config.defaultDependencies(dependencySet -> {
-                tomcatModules.forEach(dependency -> {
-                    dependencySet.add(dependency);
-                });
-            });
+            config.getDependencies().addAll(tomcatModules);
 
             // set base directory.
             File baseDirectory = ext.getBaseDirectory();
@@ -90,9 +85,9 @@ public class TomcatRunnerPlugin implements Plugin<Project> {
             this.cleanTask.delete(baseDirectory);
 
             // create and configure unzip war file task.
-            ext.getWebapps().stream().forEach(webapp -> {
+            for (WebAppConfiguration webapp : ext.getWebapps()) {
                 this.createWebappUnzipTask(project, webapp);
-            });
+            }
         }
 
         private void createWebappUnzipTask(Project project, WebAppConfiguration webapp) {

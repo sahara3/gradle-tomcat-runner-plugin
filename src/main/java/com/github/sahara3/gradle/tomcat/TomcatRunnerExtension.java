@@ -7,29 +7,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.gradle.api.Action;
 import org.gradle.api.Project;
 
-import lombok.Getter;
-import lombok.Setter;
-
+@Getter
 public class TomcatRunnerExtension {
 
     public TomcatRunnerExtension() {
         this.initDefaultJarsToSkip();
     }
 
-    @Getter
     @Setter
-    private double version = 9.0;
+    private String version = "10.1.19";
 
-    @Getter
     @Setter
     private int port = 8080;
 
-    @Getter
     private File baseDirectory;
 
+    @SuppressWarnings({"LombokSetterMayBeUsed", "RedundantSuppression"})
     public void setBaseDirectory(File baseDirectory) {
         this.baseDirectory = baseDirectory;
     }
@@ -43,7 +41,6 @@ public class TomcatRunnerExtension {
         this.setBaseDirectory(baseDir);
     }
 
-    @Getter
     private List<String> jarsToSkip;
 
     private void initDefaultJarsToSkip() {
@@ -68,15 +65,14 @@ public class TomcatRunnerExtension {
                 "xercesImpl.jar", "xml-apis.jar", "xmlParserAPIs-*.jar", "xmlParserAPIs.jar", "xom-*.jar"));
 
         // exclude tomcat-embed-*, etc. that are added by this plugin.
-        this.jarsToSkip.addAll(Arrays.asList("tomcat-embed-*.jar", "tomcat-annotations-api-*.jar", "jul-to-slf4j-*.jar",
-                "logback-core-*.jar", "logback-classic-*.jar", "gradle-tomcat-runner-plugin-*.jar"));
+        this.jarsToSkip.addAll(Arrays.asList("tomcat-embed-*.jar", "tomcat-annotations-api-*.jar",
+                "gradle-tomcat-runner-plugin-*.jar"));
     }
 
     public void jarsToSkip(String... jarsToSkip) {
         this.jarsToSkip.addAll(Arrays.asList(jarsToSkip));
     }
 
-    @Getter
     private final List<WebAppConfiguration> webapps = new ArrayList<>();
 
     public void webapp(File warFile, Action<WebAppConfiguration> action) {
@@ -111,7 +107,6 @@ public class TomcatRunnerExtension {
         this.webapp(warProject, null);
     }
 
-    @Getter
     private final Map<String, Object> systemProperties = new HashMap<>();
 
     public void systemProperty(String name, Object value) {

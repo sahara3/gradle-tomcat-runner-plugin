@@ -1,7 +1,7 @@
 unzipWebapps.dependsOn war
 
 tomcat {
-    version = 9.0
+    version = '9.0.87'
     port = 8080
     webapp(war.archiveFile.get().asFile) {
         contextPath = 'ROOT' // this is also root.

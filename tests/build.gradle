@@ -14,7 +14,7 @@ configure(allprojects) {
     apply plugin: 'com.github.sahara3.tomcat-runner'
 
     repositories {
-        jcenter()
+        mavenCentral()
     }
 }
 
@@ -22,10 +22,9 @@ configure(allprojects) {
 configure(subprojects) {
     apply plugin: 'java'
     apply plugin: 'war'
-    apply plugin: 'eclipse'
 
     dependencies {
-        providedCompile 'javax.servlet:javax.servlet-api:3.0.1'
+        providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
     }
 }
 
@@ -33,7 +32,7 @@ configure(subprojects) {
 unzipWebapps.dependsOn ':myapp1:war', ':myapp2:war', ':myapp3:war', ':myapp4:war'
 
 tomcat {
-    version = 9.0
+    version = '10.1.19'
     port = 8080
     systemProperty 'your.custom.property', 'property-value'
 
