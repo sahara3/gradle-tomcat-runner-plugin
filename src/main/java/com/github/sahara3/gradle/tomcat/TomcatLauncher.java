@@ -81,6 +81,8 @@ public class TomcatLauncher {
         this.tomcat = new Tomcat();
         this.tomcat.setPort(this.port);
         this.tomcat.setBaseDir(this.baseDir);
+        // Allow to use a context file inside the META-INF folder
+        this.tomcat.enableNaming();
 
         this.configureServer(this.tomcat.getServer());
         this.configureHost((StandardHost) this.tomcat.getHost());
